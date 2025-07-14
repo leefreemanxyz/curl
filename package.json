@@ -29,6 +29,6 @@
     "retry-axios": "^2.6.0"
   },
   "devDependencies": {
-    "@types/node": "^13.11.1"
+    "@types/node": "^20.0.0"
   }
 }
