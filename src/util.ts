@@ -1,9 +1,9 @@
-import { INPUT_ACCEPT, INPUT_RETRIES } from "./requestconf";
 import * as core from "@actions/core";
-import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
-import setOutput from "./output";
-import * as rax from "retry-axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import * as yaml from "js-yaml";
+import * as rax from "retry-axios";
+import setOutput from "./output";
+import { INPUT_ACCEPT, INPUT_RETRIES } from "./requestconf";
 
 export const getAcceptedStatusCodes = (): number[] => {
   const acceptedStatusCodes: string[] = (INPUT_ACCEPT as string)
@@ -68,5 +68,12 @@ export const sendRequestWithRetry = async (config: AxiosRequestConfig) => {
   client
     .request(config)
     .then((resp) => setOutput(resp))
-    .catch((err) => core.setFailed(err));
+    .catch((err) => {
+      // If it's an Axios error with a response, set the output so users can debug
+      if (err.response) {
+        core.info(`Request failed with status ${err.response.status}`);
+        setOutput(err.response);
+      }
+      core.setFailed(err.message || err);
+    });
 };
